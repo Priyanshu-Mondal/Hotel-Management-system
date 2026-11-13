@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickServe - Café Ordering System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+        <div class="header-brand">
+            <div class="brand-icon">☕</div>
+            <div class="brand-text">
+                <h1>QuickServe Café</h1>
+                <p class="brand-tagline">Fast • Fresh • Digital Ordering</p>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div id="connection-status" class="status-indicator online" title="Backend connection status">
+                <span class="status-dot"></span>
+                <span class="status-label">Online</span>
+            </div>
+
+            <button id="admin-btn" class="admin-icon-btn" title="Admin Panel">⚙️</button>
+
+            <nav class="app-nav">
+                <button id="menu-btn" class="nav-btn active">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">Menu</span>
+                </button>
+                <button id="cart-btn" class="nav-btn">
+                    <span class="nav-icon">🛒</span>
+                    <span class="nav-text">Cart</span>
+                    <span id="cart-count" class="badge">0</span>
+                </button>
+                <button id="orders-btn" class="nav-btn">
+                    <span class="nav-icon">👨‍🍳</span>
+                    <span class="nav-text">Kitchen</span>
+                    <span id="orders-badge" class="badge badge-accent">0</span>
+                </button>
+                <button id="tables-btn" class="nav-btn">
+                    <span class="nav-icon">🪑</span>
+                    <span class="nav-text">Tables</span>
+                </button>
+                <button id="reviews-btn" class="nav-btn">
+                    <span class="nav-icon">⭐</span>
+                    <span class="nav-text">Reviews</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="app-main">
+        <!-- GLOBAL TABLE SELECTOR BAR -->
+        <div class="table-bar">
+            <div class="table-bar-info">
+                <span class="table-bar-label">Ordering for Table:</span>
+                <div class="table-select-wrapper">
+                    <select id="global-table-select" aria-label="Select café table"></select>
+                </div>
+                <span id="table-details-badge" class="table-details-badge">2 Seats • Window</span>
+            </div>
+            <div class="table-bar-quick">
+                <span id="current-cart-quick-total">Cart: ₹0.00</span>
+                <button id="quick-cart-view-btn" class="btn btn-sm btn-outline">View Order</button>
+            </div>
+        </div>
+
+        <!-- ================= SECTION 1: MENU ================= -->
+        <section id="menu-section" class="app-section">
+            <div class="section-header">
+                <div>
+                    <h2>Café Menu</h2>
+                    <p class="section-subtitle">Browse delicious items, filter by dietary preference, or search</p>
+                </div>
+                <div class="menu-search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="menu-search-input" placeholder="Search chai, dosa, biryani..." autocomplete="off">
+                    <button id="clear-search-btn" class="clear-search-btn hidden" title="Clear search">×</button>
+                </div>
+            </div>
+
+            <div class="menu-controls">
+                <div id="category-filters" class="category-filters"></div>
+                <div class="dietary-toggle-wrap">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="veg-only-filter">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="veg-toggle-label"><span class="veg-dot-inline"></span> Veg Only</span>
+                </div>
+            </div>
+
+            <div id="menu-items" class="menu-grid"></div>
+        </section>
+
+        <!-- ================= SECTION 2: CART / CHECKOUT ================= -->
+        <section id="cart-section" class="app-section hidden">
+            <div class="section-header">
+                <div>
+                    <h2>Current Order & Checkout</h2>
+                    <p class="section-subtitle">Review items, adjust quantities, and place the order for your table</p>
+                </div>
+                <button id="cart-back-to-menu-btn" class="btn btn-sm btn-outline">← Back to Menu</button>
+            </div>
+
+            <div class="cart-layout">
+                <div class="cart-items-column">
+                    <div class="cart-card">
+                        <div class="cart-card-header">
+                            <span class="cart-card-title">Order Items</span>
+                            <button id="clear-cart-btn" class="btn-text text-danger">Clear All</button>
+                        </div>
+                        <div id="cart-items" class="cart-items-list"></div>
+                    </div>
+                </div>
+
+                <div class="cart-summary-column">
+                    <div class="cart-card summary-card">
+                        <h3 class="summary-title">Order Summary</h3>
+
+                        <div class="form-group">
+                            <label for="cart-table-select">Assigned Table *</label>
+                            <select id="cart-table-select" class="form-control"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="order-notes">Special Instructions (Optional)</label>
+                            <input type="text" id="order-notes" class="form-control" placeholder="e.g., Less spicy, separate chutney">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Payment Method</label>
+                            <div class="payment-options">
+                                <label class="radio-label">
+                                    <input type="radio" name="payment-mode" value="cash" checked>
+                                    <span>💵 Cash</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="payment-mode" value="upi">
+                                    <span>📱 UPI</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="payment-mode" value="card">
+                                    <span>💳 Card</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="bill-breakdown">
+                            <div class="bill-row">
+                                <span>Subtotal</span>
+                                <span id="bill-subtotal">₹0.00</span>
+                            </div>
+                            <div class="bill-row">
+                                <span>GST (5%) <small class="text-muted">(2.5% CGST + 2.5% SGST)</small></span>
+                                <span id="bill-tax">₹0.00</span>
+                            </div>
+                            <div class="bill-divider"></div>
+                            <div class="bill-row grand-total">
+                                <span>Grand Total</span>
+                                <span id="bill-total">₹0.00</span>
+                            </div>
+                        </div>
+
+                        <button id="checkout-btn" class="btn btn-primary btn-block btn-lg">Place Order</button>
+                        <p class="checkout-hint">Order is immediately sent to the kitchen display system.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 3: KITCHEN ================= -->
+        <section id="orders-section" class="app-section hidden">
+            <div class="section-header">
+                <div>
+                    <h2>Kitchen & Active Orders</h2>
+                    <p class="section-subtitle">Real-time status updates: Pending → Preparing → Ready → Delivered</p>
+                </div>
+                <div class="orders-header-actions">
+                    <button id="refresh-orders-btn" class="btn btn-sm btn-outline">🔄 Refresh</button>
+                </div>
+            </div>
+
+            <div class="orders-filter-bar">
+                <button class="order-filter-btn active" data-filter="all">All Orders (<span id="count-all">0</span>)</button>
+                <button class="order-filter-btn" data-filter="active">Active (<span id="count-active">0</span>)</button>
+                <button class="order-filter-btn status-pending" data-filter="pending">Pending (<span id="count-pending">0</span>)</button>
+                <button class="order-filter-btn status-preparing" data-filter="preparing">Preparing (<span id="count-preparing">0</span>)</button>
+                <button class="order-filter-btn status-ready" data-filter="ready">Ready (<span id="count-ready">0</span>)</button>
+                <button class="order-filter-btn status-delivered" data-filter="delivered">Delivered (<span id="count-delivered">0</span>)</button>
+            </div>
+
+            <div id="orders-list" class="orders-grid"></div>
+        </section>
+
+        <!-- ================= SECTION 4: TABLES ================= -->
+        <section id="tables-section" class="app-section hidden">
+            <div class="section-header">
+                <div>
+                    <h2>Café Table Overview (15 Tables)</h2>
+                    <p class="section-subtitle">Real-time occupancy, active table orders, and seating locations</p>
+                </div>
+            </div>
+            <div id="tables-grid" class="tables-grid"></div>
+        </section>
+
+        <!-- ================= SECTION 5: REVIEWS ================= -->
+        <section id="reviews-section" class="app-section hidden">
+            <div class="section-header">
+                <div>
+                    <h2>Customer Reviews</h2>
+                    <p class="section-subtitle">Real feedback from our valued customers</p>
+                </div>
+            </div>
+
+            <div id="reviews-summary"></div>
+
+            <div class="cart-card" style="margin: 1.5rem 0;">
+                <h3 class="summary-title">✍️ Write a Review</h3>
+                <div class="form-group">
+                    <label>Select Delivered Order</label>
+                    <select id="review-order-select" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="review-name" class="form-control" placeholder="e.g., Rahul" maxlength="60">
+                </div>
+                <div class="form-group">
+                    <label>Rating</label>
+                    <div id="star-input" class="star-input"></div>
+                </div>
+                <div class="form-group">
+                    <label>Comment (optional)</label>
+                    <textarea id="review-comment" class="form-control" rows="2" maxlength="500" placeholder="Tell us what you loved..."></textarea>
+                </div>
+                <button id="review-submit-btn" class="btn btn-primary btn-block">Submit Review</button>
+            </div>
+
+            <h3 style="margin-bottom: 1rem;">All Reviews</h3>
+            <div id="reviews-list" class="reviews-grid"></div>
+        </section>
+
+        <!-- ================= SECTION 6: ADMIN PANEL ================= -->
+        <section id="admin-section" class="app-section hidden">
+            <div class="section-header">
+                <div>
+                    <h2>⚙️ Admin Panel</h2>
+                    <p class="section-subtitle">Manage orders, menu, reviews & view analytics</p>
+                </div>
+                <button id="admin-logout-btn" class="btn btn-sm btn-outline">Logout</button>
+            </div>
+
+            <div class="admin-tabs">
+                <button class="admin-tab-btn active" data-tab="dashboard">📊 Dashboard</button>
+                <button class="admin-tab-btn" data-tab="orders">📋 Orders</button>
+                <button class="admin-tab-btn" data-tab="menu">🍽️ Menu</button>
+                <button class="admin-tab-btn" data-tab="reviews">⭐ Reviews</button>
+            </div>
+
+            <div id="admin-tab-dashboard" class="admin-tab-panel">
+                <div id="admin-stats" class="stats-grid"></div>
+            </div>
+            <div id="admin-tab-orders" class="admin-tab-panel hidden">
+                <div id="admin-orders-list"></div>
+            </div>
+            <div id="admin-tab-menu" class="admin-tab-panel hidden">
+                <button id="admin-add-menu-btn" class="btn btn-primary" style="margin-bottom: 1rem;">+ Add Menu Item</button>
+                <div id="admin-menu-list"></div>
+            </div>
+            <div id="admin-tab-reviews" class="admin-tab-panel hidden">
+                <div id="admin-reviews-list"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ================= BILL MODAL ================= -->
+    <div id="bill-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+        <div class="modal-card receipt-modal">
+            <button id="close-bill-btn" class="modal-close" aria-label="Close receipt">×</button>
+            <div id="receipt-content" class="receipt-paper"></div>
+            <div class="receipt-actions">
+                <button id="print-bill-btn" class="btn btn-primary">🖨️ Print Bill</button>
+                <button id="dismiss-bill-btn" class="btn btn-outline">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= ADMIN LOGIN MODAL ================= -->
+    <div id="admin-login-modal" class="modal-overlay hidden">
+        <div class="modal-card" style="max-width: 380px;">
+            <div style="padding: 2rem;">
+                <h2 style="margin-bottom: 1rem;">🔐 Admin Login</h2>
+                <input type="password" id="admin-password" class="form-control" placeholder="Enter admin password" style="margin-bottom: 1rem;">
+                <button id="admin-login-submit" class="btn btn-primary btn-block">Login</button>
+                <button id="admin-login-cancel" class="btn btn-outline btn-block" style="margin-top: 0.5rem;">Cancel</button>
+                <p class="text-muted" style="margin-top: 1rem; font-size: 0.75rem; text-align: center;">Default: admin123</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= ADMIN MENU EDIT MODAL ================= -->
+    <div id="admin-menu-modal" class="modal-overlay hidden">
+        <div class="modal-card" style="max-width: 440px;">
+            <div style="padding: 1.75rem;">
+                <h3 id="mm-title" style="margin-bottom: 1rem;">Edit Menu Item</h3>
+                <input type="hidden" id="mm-id">
+                <div class="form-group"><label>Name</label><input id="mm-name" class="form-control"></div>
+                <div class="form-group"><label>Price (₹)</label><input id="mm-price" type="number" class="form-control"></div>
+                <div class="form-group"><label>Category</label>
+                    <select id="mm-category" class="form-control">
+                        <option>Beverages</option>
+                        <option>Snacks</option>
+                        <option>South Indian</option>
+                        <option>Main Course</option>
+                        <option>Desserts</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Description</label><textarea id="mm-desc" class="form-control" rows="2"></textarea></div>
+                <div class="form-group"><label><input type="checkbox" id="mm-veg"> Vegetarian</label></div>
+                <div class="form-group"><label><input type="checkbox" id="mm-available"> Available</label></div>
+                <button id="mm-save-btn" class="btn btn-primary btn-block">Save</button>
+                <button id="mm-cancel-btn" class="btn btn-outline btn-block" style="margin-top: 0.5rem;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= TOAST ================= -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/tables.js"></script>
+    <script src="js/reviews.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
